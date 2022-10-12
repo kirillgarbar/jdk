@@ -191,6 +191,7 @@ class CollectedHeap : public CHeapObj<mtGC> {
     Parallel,
     G1,
     Epsilon,
+    Zer,
     Z,
     Shenandoah
   };

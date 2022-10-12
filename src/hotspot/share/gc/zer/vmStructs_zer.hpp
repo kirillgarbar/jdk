@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2019, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,26 +22,25 @@
  *
  */
 
-#ifndef SHARE_GC_SHARED_BARRIERSETCONFIG_HPP
-#define SHARE_GC_SHARED_BARRIERSETCONFIG_HPP
+#ifndef SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
+#define SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
 
-#include "utilities/macros.hpp"
+#include "gc/zer/zerHeap.hpp"
+#include "gc/shared/space.hpp"
+#include "memory/virtualspace.hpp"
 
-// Do something for each concrete barrier set part of the build.
-#define FOR_EACH_CONCRETE_BARRIER_SET_DO(f)          \
-  f(CardTableBarrierSet)                             \
-  ZERGC_ONLY(f(ZerBarrierSet))                       \
-  EPSILONGC_ONLY(f(EpsilonBarrierSet))               \
-  G1GC_ONLY(f(G1BarrierSet))                         \
-  SHENANDOAHGC_ONLY(f(ShenandoahBarrierSet))         \
-  ZGC_ONLY(f(ZBarrierSet))
+#define VM_STRUCTS_ZERGC(nonstatic_field,                       \
+                            volatile_nonstatic_field,               \
+                            static_field)                           \
+  nonstatic_field(ZerHeap, _virtual_space, VirtualSpace)        \
+  nonstatic_field(ZerHeap, _space, ContiguousSpace*)
 
-#define FOR_EACH_ABSTRACT_BARRIER_SET_DO(f)          \
-  f(ModRef)
+#define VM_TYPES_ZERGC(declare_type,                            \
+                          declare_toplevel_type,                    \
+                          declare_integer_type)                     \
+  declare_type(ZerHeap, CollectedHeap)
 
-// Do something for each known barrier set.
-#define FOR_EACH_BARRIER_SET_DO(f)    \
-  FOR_EACH_ABSTRACT_BARRIER_SET_DO(f) \
-  FOR_EACH_CONCRETE_BARRIER_SET_DO(f)
+#define VM_INT_CONSTANTS_ZERGC(declare_constant,                \
+                                  declare_constant_with_value)
 
-#endif // SHARE_GC_SHARED_BARRIERSETCONFIG_HPP
+#endif // SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
