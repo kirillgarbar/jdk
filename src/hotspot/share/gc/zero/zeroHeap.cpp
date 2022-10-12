@@ -23,10 +23,10 @@
  */
 
 #include "precompiled.hpp"
-#include "gc/zer/zerHeap.hpp"
-#include "gc/zer/zerInitLogger.hpp"
-#include "gc/zer/zerMemoryPool.hpp"
-#include "gc/zer/zerThreadLocalData.hpp"
+#include "gc/zero/zeroHeap.hpp"
+#include "gc/zero/zeroInitLogger.hpp"
+#include "gc/zero/zeroMemoryPool.hpp"
+#include "gc/zero/zeroThreadLocalData.hpp"
 #include "gc/shared/gcArguments.hpp"
 #include "gc/shared/locationPrinter.inline.hpp"
 #include "logging/log.hpp"
@@ -38,7 +38,7 @@
 #include "runtime/atomic.hpp"
 #include "runtime/globals.hpp"
 
-jint ZerHeap::initialize() {
+jint ZeroHeap::initialize() {
   size_t align = HeapAlignment;
   size_t init_byte_size = align_up(InitialHeapSize, align);
   size_t max_byte_size  = align_up(MaxHeapSize, align);
@@ -55,57 +55,57 @@ jint ZerHeap::initialize() {
   _space->initialize(committed_region, /* clear_space = */ true, /* mangle_space = */ true);
 
   // Precompute hot fields
-  _max_tlab_size = MIN2(CollectedHeap::max_tlab_size(), align_object_size(ZerMaxTLABSize / HeapWordSize));
-  _step_counter_update = MIN2<size_t>(max_byte_size / 16, ZerUpdateCountersStep);
-  _step_heap_print = (ZerPrintHeapSteps == 0) ? SIZE_MAX : (max_byte_size / ZerPrintHeapSteps);
-  _decay_time_ns = (int64_t) ZerTLABDecayTime * NANOSECS_PER_MILLISEC;
+  _max_tlab_size = MIN2(CollectedHeap::max_tlab_size(), align_object_size(ZeroMaxTLABSize / HeapWordSize));
+  _step_counter_update = MIN2<size_t>(max_byte_size / 16, ZeroUpdateCountersStep);
+  _step_heap_print = (ZeroPrintHeapSteps == 0) ? SIZE_MAX : (max_byte_size / ZeroPrintHeapSteps);
+  _decay_time_ns = (int64_t) ZeroTLABDecayTime * NANOSECS_PER_MILLISEC;
 
   // Enable monitoring
-  _monitoring_support = new ZerMonitoringSupport(this);
+  _monitoring_support = new ZeroMonitoringSupport(this);
   _last_counter_update = 0;
   _last_heap_print = 0;
 
   // Install barrier set
-  BarrierSet::set_barrier_set(new ZerBarrierSet());
+  BarrierSet::set_barrier_set(new ZeroBarrierSet());
 
   // All done, print out the configuration
-  ZerInitLogger::print();
+  ZeroInitLogger::print();
 
   return JNI_OK;
 }
 
-void ZerHeap::post_initialize() {
+void ZeroHeap::post_initialize() {
   CollectedHeap::post_initialize();
 }
 
-void ZerHeap::initialize_serviceability() {
-  _pool = new ZerMemoryPool(this);
+void ZeroHeap::initialize_serviceability() {
+  _pool = new ZeroMemoryPool(this);
   _memory_manager.add_pool(_pool);
 }
 
-GrowableArray<GCMemoryManager*> ZerHeap::memory_managers() {
+GrowableArray<GCMemoryManager*> ZeroHeap::memory_managers() {
   GrowableArray<GCMemoryManager*> memory_managers(1);
   memory_managers.append(&_memory_manager);
   return memory_managers;
 }
 
-GrowableArray<MemoryPool*> ZerHeap::memory_pools() {
+GrowableArray<MemoryPool*> ZeroHeap::memory_pools() {
   GrowableArray<MemoryPool*> memory_pools(1);
   memory_pools.append(_pool);
   return memory_pools;
 }
 
-size_t ZerHeap::unsafe_max_tlab_alloc(Thread* thr) const {
+size_t ZeroHeap::unsafe_max_tlab_alloc(Thread* thr) const {
   // Return max allocatable TLAB size, and let allocation path figure out
   // the actual allocation size. Note: result should be in bytes.
   return _max_tlab_size * HeapWordSize;
 }
 
-ZerHeap* ZerHeap::heap() {
-  return named_heap<ZerHeap>(CollectedHeap::Zer);
+ZeroHeap* ZeroHeap::heap() {
+  return named_heap<ZeroHeap>(CollectedHeap::Zero);
 }
 
-HeapWord* ZerHeap::allocate_work(size_t size, bool verbose) {
+HeapWord* ZeroHeap::allocate_work(size_t size, bool verbose) {
   assert(is_object_aligned(size), "Allocation size should be aligned: " SIZE_FORMAT, size);
 
   HeapWord* res = NULL;
@@ -128,7 +128,7 @@ HeapWord* ZerHeap::allocate_work(size_t size, bool verbose) {
 
       // Expand and loop back if space is available
       size_t space_left = max_capacity() - capacity();
-      size_t want_space = MAX2(size, ZerMinHeapExpand);
+      size_t want_space = MAX2(size, ZeroMinHeapExpand);
 
       if (want_space < space_left) {
         // Enough space to expand in bulk:
@@ -171,7 +171,7 @@ HeapWord* ZerHeap::allocate_work(size_t size, bool verbose) {
   return res;
 }
 
-HeapWord* ZerHeap::allocate_new_tlab(size_t min_size,
+HeapWord* ZeroHeap::allocate_new_tlab(size_t min_size,
                                          size_t requested_size,
                                          size_t* actual_size) {
   Thread* thread = Thread::current();
@@ -182,11 +182,11 @@ HeapWord* ZerHeap::allocate_new_tlab(size_t min_size,
   size_t ergo_tlab = requested_size;
   int64_t time = 0;
 
-  if (ZerElasticTLAB) {
-    ergo_tlab = ZerThreadLocalData::ergo_tlab_size(thread);
+  if (ZeroElasticTLAB) {
+    ergo_tlab = ZeroThreadLocalData::ergo_tlab_size(thread);
 
-    if (ZerElasticTLABDecay) {
-      int64_t last_time = ZerThreadLocalData::last_tlab_time(thread);
+    if (ZeroElasticTLABDecay) {
+      int64_t last_time = ZeroThreadLocalData::last_tlab_time(thread);
       time = (int64_t) os::javaTimeNanos();
 
       assert(last_time <= time, "time should be monotonic");
@@ -196,7 +196,7 @@ HeapWord* ZerHeap::allocate_new_tlab(size_t min_size,
       // and then started allocating only sporadically.
       if (last_time != 0 && (time - last_time > _decay_time_ns)) {
         ergo_tlab = 0;
-        ZerThreadLocalData::set_ergo_tlab_size(thread, 0);
+        ZeroThreadLocalData::set_ergo_tlab_size(thread, 0);
       }
     }
 
@@ -204,7 +204,7 @@ HeapWord* ZerHeap::allocate_new_tlab(size_t min_size,
     // Otherwise, we want to elastically increase the TLAB size.
     fits = (requested_size <= ergo_tlab);
     if (!fits) {
-      size = (size_t) (ergo_tlab * ZerTLABElasticity);
+      size = (size_t) (ergo_tlab * ZeroTLABElasticity);
     }
   }
 
@@ -242,39 +242,39 @@ HeapWord* ZerHeap::allocate_new_tlab(size_t min_size,
   if (res != NULL) {
     // Allocation successful
     *actual_size = size;
-    if (ZerElasticTLABDecay) {
-      ZerThreadLocalData::set_last_tlab_time(thread, time);
+    if (ZeroElasticTLABDecay) {
+      ZeroThreadLocalData::set_last_tlab_time(thread, time);
     }
-    if (ZerElasticTLAB && !fits) {
+    if (ZeroElasticTLAB && !fits) {
       // If we requested expansion, this is our new ergonomic TLAB size
-      ZerThreadLocalData::set_ergo_tlab_size(thread, size);
+      ZeroThreadLocalData::set_ergo_tlab_size(thread, size);
     }
   } else {
     // Allocation failed, reset ergonomics to try and fit smaller TLABs
-    if (ZerElasticTLAB) {
-      ZerThreadLocalData::set_ergo_tlab_size(thread, 0);
+    if (ZeroElasticTLAB) {
+      ZeroThreadLocalData::set_ergo_tlab_size(thread, 0);
     }
   }
 
   return res;
 }
 
-HeapWord* ZerHeap::mem_allocate(size_t size, bool *gc_overhead_limit_was_exceeded) {
+HeapWord* ZeroHeap::mem_allocate(size_t size, bool *gc_overhead_limit_was_exceeded) {
   *gc_overhead_limit_was_exceeded = false;
   return allocate_work(size);
 }
 
-HeapWord* ZerHeap::allocate_loaded_archive_space(size_t size) {
+HeapWord* ZeroHeap::allocate_loaded_archive_space(size_t size) {
   // Cannot use verbose=true because Metaspace is not initialized
   return allocate_work(size, /* verbose = */false);
 }
 
-void ZerHeap::collect(GCCause::Cause cause) {
+void ZeroHeap::collect(GCCause::Cause cause) {
   switch (cause) {
     case GCCause::_metadata_GC_threshold:
     case GCCause::_metadata_GC_clear_soft_refs:
       // Receiving these causes means the VM itself entered the safepoint for metadata collection.
-      // While Zer does not do GC, it has to perform sizing adjustments, otherwise we would
+      // While Zero does not do GC, it has to perform sizing adjustments, otherwise we would
       // re-enter the safepoint again very soon.
 
       assert(SafepointSynchronize::is_at_safepoint(), "Expected at safepoint");
@@ -288,16 +288,16 @@ void ZerHeap::collect(GCCause::Cause cause) {
   _monitoring_support->update_counters();
 }
 
-void ZerHeap::do_full_collection(bool clear_all_soft_refs) {
+void ZeroHeap::do_full_collection(bool clear_all_soft_refs) {
   collect(gc_cause());
 }
 
-void ZerHeap::object_iterate(ObjectClosure *cl) {
+void ZeroHeap::object_iterate(ObjectClosure *cl) {
   _space->object_iterate(cl);
 }
 
-void ZerHeap::print_on(outputStream *st) const {
-  st->print_cr("Zer Heap");
+void ZeroHeap::print_on(outputStream *st) const {
+  st->print_cr("Zero Heap");
 
   _virtual_space.print_on(st);
 
@@ -309,16 +309,16 @@ void ZerHeap::print_on(outputStream *st) const {
   MetaspaceUtils::print_on(st);
 }
 
-bool ZerHeap::print_location(outputStream* st, void* addr) const {
-  return BlockLocationPrinter<ZerHeap>::print_location(st, addr);
+bool ZeroHeap::print_location(outputStream* st, void* addr) const {
+  return BlockLocationPrinter<ZeroHeap>::print_location(st, addr);
 }
 
-void ZerHeap::print_tracing_info() const {
+void ZeroHeap::print_tracing_info() const {
   print_heap_info(used());
   print_metaspace_info();
 }
 
-void ZerHeap::print_heap_info(size_t used) const {
+void ZeroHeap::print_heap_info(size_t used) const {
   size_t reserved  = max_capacity();
   size_t committed = capacity();
 
@@ -335,7 +335,7 @@ void ZerHeap::print_heap_info(size_t used) const {
   }
 }
 
-void ZerHeap::print_metaspace_info() const {
+void ZeroHeap::print_metaspace_info() const {
   MetaspaceCombinedStats stats = MetaspaceUtils::get_combined_statistics();
   size_t reserved  = stats.reserved();
   size_t committed = stats.committed();

@@ -23,15 +23,15 @@
  */
 
 #include "precompiled.hpp"
-#include "gc/zer/zerHeap.hpp"
-#include "gc/zer/zerInitLogger.hpp"
+#include "gc/zero/zeroHeap.hpp"
+#include "gc/zero/zeroInitLogger.hpp"
 #include "gc/shared/tlab_globals.hpp"
 #include "logging/log.hpp"
 #include "runtime/globals.hpp"
 #include "runtime/globals_extension.hpp"
 #include "utilities/globalDefinitions.hpp"
 
-void ZerInitLogger::print_gc_specific() {
+void ZeroInitLogger::print_gc_specific() {
   // Warn users that non-resizable heap might be better for some configurations.
   // We are not adjusting the heap size by ourselves, because it affects startup time.
   if (InitialHeapSize != MaxHeapSize) {
@@ -45,21 +45,21 @@ void ZerInitLogger::print_gc_specific() {
   }
 
   if (UseTLAB) {
-    size_t max_tlab = ZerHeap::heap()->max_tlab_size() * HeapWordSize;
+    size_t max_tlab = ZeroHeap::heap()->max_tlab_size() * HeapWordSize;
     log_info(gc, init)("TLAB Size Max: " SIZE_FORMAT "%s",
                        byte_size_in_exact_unit(max_tlab), exact_unit_for_byte_size(max_tlab));
-    if (ZerElasticTLAB) {
-      log_info(gc, init)("TLAB Size Elasticity: %.2fx", ZerTLABElasticity);
+    if (ZeroElasticTLAB) {
+      log_info(gc, init)("TLAB Size Elasticity: %.2fx", ZeroTLABElasticity);
     }
-    if (ZerElasticTLABDecay) {
-      log_info(gc, init)("TLAB Size Decay Time: " SIZE_FORMAT "ms", ZerTLABDecayTime);
+    if (ZeroElasticTLABDecay) {
+      log_info(gc, init)("TLAB Size Decay Time: " SIZE_FORMAT "ms", ZeroTLABDecayTime);
     }
   } else {
     log_info(gc, init)("TLAB: Disabled");
   }
 }
 
-void ZerInitLogger::print() {
-  ZerInitLogger init_log;
+void ZeroInitLogger::print() {
+  ZeroInitLogger init_log;
   init_log.print_all();
 }

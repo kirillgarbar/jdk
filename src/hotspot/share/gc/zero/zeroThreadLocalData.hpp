@@ -22,34 +22,34 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZERTHREADLOCALDATA_HPP
-#define SHARE_GC_ZER_ZERTHREADLOCALDATA_HPP
+#ifndef SHARE_GC_ZERO_ZEROTHREADLOCALDATA_HPP
+#define SHARE_GC_ZERO_ZEROTHREADLOCALDATA_HPP
 
 #include "gc/shared/gc_globals.hpp"
 #include "runtime/javaThread.hpp"
 #include "utilities/debug.hpp"
 
-class ZerThreadLocalData {
+class ZeroThreadLocalData {
 private:
   size_t _ergo_tlab_size;
   int64_t _last_tlab_time;
 
-  ZerThreadLocalData() :
+  ZeroThreadLocalData() :
           _ergo_tlab_size(0),
           _last_tlab_time(0) {}
 
-  static ZerThreadLocalData* data(Thread* thread) {
-    assert(UseZerGC, "Sanity");
-    return thread->gc_data<ZerThreadLocalData>();
+  static ZeroThreadLocalData* data(Thread* thread) {
+    assert(UseZeroGC, "Sanity");
+    return thread->gc_data<ZeroThreadLocalData>();
   }
 
 public:
   static void create(Thread* thread) {
-    new (data(thread)) ZerThreadLocalData();
+    new (data(thread)) ZeroThreadLocalData();
   }
 
   static void destroy(Thread* thread) {
-    data(thread)->~ZerThreadLocalData();
+    data(thread)->~ZeroThreadLocalData();
   }
 
   static size_t ergo_tlab_size(Thread *thread) {
@@ -69,4 +69,4 @@ public:
   }
 };
 
-#endif // SHARE_GC_ZER_ZERTHREADLOCALDATA_HPP
+#endif // SHARE_GC_ZERO_ZEROTHREADLOCALDATA_HPP

@@ -22,23 +22,20 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZERMONITORINGSUPPORT_HPP
-#define SHARE_GC_ZER_ZERMONITORINGSUPPORT_HPP
+#ifndef SHARE_GC_ZERO_ZEROARGUMENTS_HPP
+#define SHARE_GC_ZERO_ZEROARGUMENTS_HPP
 
-#include "memory/allocation.hpp"
+#include "gc/shared/gcArguments.hpp"
 
-class GenerationCounters;
-class ZerSpaceCounters;
-class ZerHeap;
+class CollectedHeap;
 
-class ZerMonitoringSupport : public CHeapObj<mtGC> {
+class ZeroArguments : public GCArguments {
 private:
-  GenerationCounters*   _heap_counters;
-  ZerSpaceCounters* _space_counters;
+  virtual void initialize_alignments();
 
-public:
-  ZerMonitoringSupport(ZerHeap* heap);
-  void update_counters();
+  virtual void initialize();
+  virtual size_t conservative_max_heap_alignment();
+  virtual CollectedHeap* create_heap();
 };
 
-#endif // SHARE_GC_ZER_ZERMONITORINGSUPPORT_HPP
+#endif // SHARE_GC_ZERO_ZEROARGUMENTS_HPP

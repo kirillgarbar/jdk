@@ -23,29 +23,23 @@
  */
 
 #include "precompiled.hpp"
-#include "gc/zer/zerBarrierSet.hpp"
-#include "gc/zer/zerThreadLocalData.hpp"
-#include "gc/shared/barrierSet.hpp"
-#include "gc/shared/barrierSetAssembler.hpp"
-#ifdef COMPILER1
-#include "gc/shared/c1/barrierSetC1.hpp"
-#endif
-#ifdef COMPILER2
-#include "gc/shared/c2/barrierSetC2.hpp"
-#endif
-#include "runtime/javaThread.hpp"
+#include "gc/zero/zeroHeap.hpp"
+#include "gc/zero/zeroMemoryPool.hpp"
 
-ZerBarrierSet::ZerBarrierSet() : BarrierSet(
-          make_barrier_set_assembler<BarrierSetAssembler>(),
-          make_barrier_set_c1<BarrierSetC1>(),
-          make_barrier_set_c2<BarrierSetC2>(),
-          NULL /* barrier_set_nmethod */,
-          BarrierSet::FakeRtti(BarrierSet::ZerBarrierSet)) {}
-
-void ZerBarrierSet::on_thread_create(Thread *thread) {
-  ZerThreadLocalData::create(thread);
+ZeroMemoryPool::ZeroMemoryPool(ZeroHeap* heap) :
+        CollectedMemoryPool("Zero Heap",
+                            heap->capacity(),
+                            heap->max_capacity(),
+                            false),
+        _heap(heap) {
+  assert(UseZeroGC, "sanity");
 }
 
-void ZerBarrierSet::on_thread_destroy(Thread *thread) {
-  ZerThreadLocalData::destroy(thread);
+MemoryUsage ZeroMemoryPool::get_memory_usage() {
+  size_t initial_sz = initial_size();
+  size_t max_sz     = max_size();
+  size_t used       = used_in_bytes();
+  size_t committed  = committed_in_bytes();
+
+  return MemoryUsage(initial_sz, used, committed, max_sz);
 }

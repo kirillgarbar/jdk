@@ -22,24 +22,23 @@
  *
  */
 
-#include "precompiled.hpp"
-#include "gc/zer/zerHeap.hpp"
-#include "gc/zer/zerMemoryPool.hpp"
+#ifndef SHARE_GC_ZERO_ZEROMONITORINGSUPPORT_HPP
+#define SHARE_GC_ZERO_ZEROMONITORINGSUPPORT_HPP
 
-ZerMemoryPool::ZerMemoryPool(ZerHeap* heap) :
-        CollectedMemoryPool("Zer Heap",
-                            heap->capacity(),
-                            heap->max_capacity(),
-                            false),
-        _heap(heap) {
-  assert(UseZerGC, "sanity");
-}
+#include "memory/allocation.hpp"
 
-MemoryUsage ZerMemoryPool::get_memory_usage() {
-  size_t initial_sz = initial_size();
-  size_t max_sz     = max_size();
-  size_t used       = used_in_bytes();
-  size_t committed  = committed_in_bytes();
+class GenerationCounters;
+class ZeroSpaceCounters;
+class ZeroHeap;
 
-  return MemoryUsage(initial_sz, used, committed, max_sz);
-}
+class ZeroMonitoringSupport : public CHeapObj<mtGC> {
+private:
+  GenerationCounters*   _heap_counters;
+  ZeroSpaceCounters* _space_counters;
+
+public:
+  ZeroMonitoringSupport(ZeroHeap* heap);
+  void update_counters();
+};
+
+#endif // SHARE_GC_ZERO_ZEROMONITORINGSUPPORT_HPP

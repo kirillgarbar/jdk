@@ -23,8 +23,8 @@
  */
 
 #include "precompiled.hpp"
-#include "gc/zer/zerMonitoringSupport.hpp"
-#include "gc/zer/zerHeap.hpp"
+#include "gc/zero/zeroMonitoringSupport.hpp"
+#include "gc/zero/zeroHeap.hpp"
 #include "gc/shared/generationCounters.hpp"
 #include "memory/allocation.hpp"
 #include "memory/metaspaceCounters.hpp"
@@ -32,7 +32,7 @@
 #include "runtime/perfData.hpp"
 #include "services/memoryService.hpp"
 
-class ZerSpaceCounters: public CHeapObj<mtGC> {
+class ZeroSpaceCounters: public CHeapObj<mtGC> {
   friend class VMStructs;
 
 private:
@@ -41,7 +41,7 @@ private:
   char*         _name_space;
 
 public:
-  ZerSpaceCounters(const char* name,
+  ZeroSpaceCounters(const char* name,
                  int ordinal,
                  size_t max_size,
                  size_t initial_capacity,
@@ -72,7 +72,7 @@ public:
     }
   }
 
-  ~ZerSpaceCounters() {
+  ~ZeroSpaceCounters() {
     FREE_C_HEAP_ARRAY(char, _name_space);
   }
 
@@ -82,11 +82,11 @@ public:
   }
 };
 
-class ZerGenerationCounters : public GenerationCounters {
+class ZeroGenerationCounters : public GenerationCounters {
 private:
-  ZerHeap* _heap;
+  ZeroHeap* _heap;
 public:
-  ZerGenerationCounters(ZerHeap* heap) :
+  ZeroGenerationCounters(ZeroHeap* heap) :
           GenerationCounters("Heap", 1, 1, 0, heap->max_capacity(), heap->capacity()),
           _heap(heap)
   {};
@@ -96,16 +96,16 @@ public:
   }
 };
 
-ZerMonitoringSupport::ZerMonitoringSupport(ZerHeap* heap) {
-  _heap_counters  = new ZerGenerationCounters(heap);
-  _space_counters = new ZerSpaceCounters("Heap", 0, heap->max_capacity(), 0, _heap_counters);
+ZeroMonitoringSupport::ZeroMonitoringSupport(ZeroHeap* heap) {
+  _heap_counters  = new ZeroGenerationCounters(heap);
+  _space_counters = new ZeroSpaceCounters("Heap", 0, heap->max_capacity(), 0, _heap_counters);
 }
 
-void ZerMonitoringSupport::update_counters() {
+void ZeroMonitoringSupport::update_counters() {
   MemoryService::track_memory_usage();
 
   if (UsePerfData) {
-    ZerHeap* heap = ZerHeap::heap();
+    ZeroHeap* heap = ZeroHeap::heap();
     size_t used = heap->used();
     size_t capacity = heap->capacity();
     _heap_counters->update_all();

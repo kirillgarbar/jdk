@@ -33,8 +33,8 @@
 #if INCLUDE_EPSILONGC
 #include "gc/epsilon/epsilonBarrierSet.hpp"
 #endif
-#if INCLUDE_ZERGC
-#include "gc/zer/zerBarrierSet.hpp"
+#if INCLUDE_ZEROGC
+#include "gc/zero/zeroBarrierSet.hpp"
 #endif
 #if INCLUDE_G1GC
 #include "gc/g1/g1BarrierSet.inline.hpp"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2018, Red Hat Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,36 +22,25 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZERBARRIERSET_HPP
-#define SHARE_GC_ZER_ZERBARRIERSET_HPP
+#ifndef SHARE_GC_ZERO_VMSTRUCTS_ZERO_HPP
+#define SHARE_GC_ZERO_VMSTRUCTS_ZERO_HPP
 
-#include "gc/shared/barrierSet.hpp"
+#include "gc/zero/zeroHeap.hpp"
+#include "gc/shared/space.hpp"
+#include "memory/virtualspace.hpp"
 
-// No interaction with application is required for Zer, and therefore
-// the barrier set is empty.
-class ZerBarrierSet: public BarrierSet {
-  friend class VMStructs;
+#define VM_STRUCTS_ZEROGC(nonstatic_field,                       \
+                            volatile_nonstatic_field,               \
+                            static_field)                           \
+  nonstatic_field(ZeroHeap, _virtual_space, VirtualSpace)        \
+  nonstatic_field(ZeroHeap, _space, ContiguousSpace*)
 
-public:
-  ZerBarrierSet();
+#define VM_TYPES_ZEROGC(declare_type,                            \
+                          declare_toplevel_type,                    \
+                          declare_integer_type)                     \
+  declare_type(ZeroHeap, CollectedHeap)
 
-  virtual void print_on(outputStream *st) const {}
+#define VM_INT_CONSTANTS_ZEROGC(declare_constant,                \
+                                  declare_constant_with_value)
 
-  virtual void on_thread_create(Thread* thread);
-  virtual void on_thread_destroy(Thread* thread);
-
-  template <DecoratorSet decorators, typename BarrierSetT = ZerBarrierSet>
-  class AccessBarrier: public BarrierSet::AccessBarrier<decorators, BarrierSetT> {};
-};
-
-template<>
-struct BarrierSet::GetName<ZerBarrierSet> {
-  static const BarrierSet::Name value = BarrierSet::ZerBarrierSet;
-};
-
-template<>
-struct BarrierSet::GetType<BarrierSet::ZerBarrierSet> {
-  typedef ::ZerBarrierSet type;
-};
-
-#endif // SHARE_GC_ZER_ZERBARRIERSET_HPP
+#endif // SHARE_GC_ZERO_VMSTRUCTS_ZERO_HPP

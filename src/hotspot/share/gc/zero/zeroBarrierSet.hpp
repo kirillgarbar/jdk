@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Red Hat Inc. All rights reserved.
+ * Copyright (c) 2017, 2018, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,25 +22,36 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
-#define SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
+#ifndef SHARE_GC_ZERO_ZEROBARRIERSET_HPP
+#define SHARE_GC_ZERO_ZEROBARRIERSET_HPP
 
-#include "gc/zer/zerHeap.hpp"
-#include "gc/shared/space.hpp"
-#include "memory/virtualspace.hpp"
+#include "gc/shared/barrierSet.hpp"
 
-#define VM_STRUCTS_ZERGC(nonstatic_field,                       \
-                            volatile_nonstatic_field,               \
-                            static_field)                           \
-  nonstatic_field(ZerHeap, _virtual_space, VirtualSpace)        \
-  nonstatic_field(ZerHeap, _space, ContiguousSpace*)
+// No interaction with application is required for Zero, and therefore
+// the barrier set is empty.
+class ZeroBarrierSet: public BarrierSet {
+  friend class VMStructs;
 
-#define VM_TYPES_ZERGC(declare_type,                            \
-                          declare_toplevel_type,                    \
-                          declare_integer_type)                     \
-  declare_type(ZerHeap, CollectedHeap)
+public:
+  ZeroBarrierSet();
 
-#define VM_INT_CONSTANTS_ZERGC(declare_constant,                \
-                                  declare_constant_with_value)
+  virtual void print_on(outputStream *st) const {}
 
-#endif // SHARE_GC_ZER_VMSTRUCTS_ZER_HPP
+  virtual void on_thread_create(Thread* thread);
+  virtual void on_thread_destroy(Thread* thread);
+
+  template <DecoratorSet decorators, typename BarrierSetT = ZeroBarrierSet>
+  class AccessBarrier: public BarrierSet::AccessBarrier<decorators, BarrierSetT> {};
+};
+
+template<>
+struct BarrierSet::GetName<ZeroBarrierSet> {
+  static const BarrierSet::Name value = BarrierSet::ZeroBarrierSet;
+};
+
+template<>
+struct BarrierSet::GetType<BarrierSet::ZeroBarrierSet> {
+  typedef ::ZeroBarrierSet type;
+};
+
+#endif // SHARE_GC_ZERO_ZEROBARRIERSET_HPP

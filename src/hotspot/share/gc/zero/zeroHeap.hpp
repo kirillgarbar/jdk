@@ -22,22 +22,22 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZERHEAP_HPP
-#define SHARE_GC_ZER_ZERHEAP_HPP
+#ifndef SHARE_GC_ZERO_ZEROHEAP_HPP
+#define SHARE_GC_ZERO_ZEROHEAP_HPP
 
-#include "gc/zer/zerBarrierSet.hpp"
-#include "gc/zer/zerMonitoringSupport.hpp"
+#include "gc/zero/zeroBarrierSet.hpp"
+#include "gc/zero/zeroMonitoringSupport.hpp"
 #include "gc/shared/collectedHeap.hpp"
 #include "gc/shared/softRefPolicy.hpp"
 #include "gc/shared/space.hpp"
 #include "memory/virtualspace.hpp"
 #include "services/memoryManager.hpp"
 
-class ZerHeap : public CollectedHeap {
+class ZeroHeap : public CollectedHeap {
   friend class VMStructs;
 private:
   SoftRefPolicy _soft_ref_policy;
-  ZerMonitoringSupport* _monitoring_support;
+  ZeroMonitoringSupport* _monitoring_support;
   MemoryPool* _pool;
   GCMemoryManager _memory_manager;
   ContiguousSpace* _space;
@@ -50,18 +50,18 @@ private:
   volatile size_t _last_heap_print;
 
 public:
-  static ZerHeap* heap();
+  static ZeroHeap* heap();
 
-  ZerHeap() :
-          _memory_manager("Zer Heap", ""),
+  ZeroHeap() :
+          _memory_manager("Zero Heap", ""),
           _space(NULL) {};
 
   virtual Name kind() const {
-    return CollectedHeap::Zer;
+    return CollectedHeap::Zero;
   }
 
   virtual const char* name() const {
-    return "Zer";
+    return "Zero";
   }
 
   virtual SoftRefPolicy* soft_ref_policy() {
@@ -147,4 +147,4 @@ private:
 
 };
 
-#endif // SHARE_GC_ZER_ZERHEAP_HPP
+#endif // SHARE_GC_ZERO_ZEROHEAP_HPP

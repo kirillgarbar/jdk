@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018, Red Hat, Inc. All rights reserved.
+ * Copyright (c) 2020, Red Hat, Inc. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,20 +22,17 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZERARGUMENTS_HPP
-#define SHARE_GC_ZER_ZERARGUMENTS_HPP
+#ifndef SHARE_GC_ZERO_ZEROINITLOGGER_HPP
+#define SHARE_GC_ZERO_ZEROINITLOGGER_HPP
 
-#include "gc/shared/gcArguments.hpp"
+#include "gc/shared/gcInitLogger.hpp"
 
-class CollectedHeap;
+class ZeroInitLogger : public GCInitLogger {
+protected:
+  virtual void print_gc_specific();
 
-class ZerArguments : public GCArguments {
-private:
-  virtual void initialize_alignments();
-
-  virtual void initialize();
-  virtual size_t conservative_max_heap_alignment();
-  virtual CollectedHeap* create_heap();
+public:
+  static void print();
 };
 
-#endif // SHARE_GC_ZER_ZERARGUMENTS_HPP
+#endif // SHARE_GC_ZERO_ZEROINITLOGGER_HPP

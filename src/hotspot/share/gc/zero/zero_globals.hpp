@@ -23,16 +23,16 @@
  *
  */
 
-#ifndef SHARE_GC_ZER_ZER_GLOBALS_HPP
-#define SHARE_GC_ZER_ZER_GLOBALS_HPP
+#ifndef SHARE_GC_ZERO_ZERO_GLOBALS_HPP
+#define SHARE_GC_ZERO_ZERO_GLOBALS_HPP
 
 #include "runtime/globals_shared.hpp"
 
 //
-// Defines all globals flags used by the ZER GC.
+// Defines all globals flags used by the Zero GC.
 //
 
-#define GC_ZER_FLAGS(develop,                                           \
+#define GC_ZERO_FLAGS(develop,                                           \
                          develop_pd,                                        \
                          product,                                           \
                          product_pd,                                        \
@@ -40,54 +40,54 @@
                          range,                                             \
                          constraint)                                        \
                                                                             \
-  product(size_t, ZerPrintHeapSteps, 20, EXPERIMENTAL,                  \
+  product(size_t, ZeroPrintHeapSteps, 20, EXPERIMENTAL,                  \
           "Print heap occupancy stats with this number of steps. "          \
           "0 turns the printing off.")                                      \
           range(0, max_intx)                                                \
                                                                             \
-  product(size_t, ZerUpdateCountersStep, 1 * M, EXPERIMENTAL,           \
+  product(size_t, ZeroUpdateCountersStep, 1 * M, EXPERIMENTAL,           \
           "Update heap occupancy counters after allocating this much "      \
           "memory. Higher values would make allocations faster at "         \
           "the expense of lower resolution in heap counters.")              \
           range(1, max_intx)                                                \
                                                                             \
-  product(size_t, ZerMaxTLABSize, 4 * M, EXPERIMENTAL,                  \
-          "Max TLAB size to use with ZER GC. Larger value improves "    \
+  product(size_t, ZeroMaxTLABSize, 4 * M, EXPERIMENTAL,                  \
+          "Max TLAB size to use with Zero GC. Larger value improves "    \
           "performance at the expense of per-thread memory waste. This "    \
           "asks TLAB machinery to cap TLAB sizes at this value.")           \
           range(1, max_intx)                                                \
                                                                             \
-  product(bool, ZerElasticTLAB, true, EXPERIMENTAL,                     \
+  product(bool, ZeroElasticTLAB, true, EXPERIMENTAL,                     \
           "Use elastic policy to manage TLAB sizes. This conserves memory " \
           "for non-actively allocating threads, even when they request "    \
           "large TLABs for themselves. Active threads would experience "    \
           "smaller TLABs until policy catches up.")                         \
                                                                             \
-  product(bool, ZerElasticTLABDecay, true, EXPERIMENTAL,                \
+  product(bool, ZeroElasticTLABDecay, true, EXPERIMENTAL,                \
           "Use timed decays to shrink TLAB sizes. This conserves memory "   \
           "for the threads that allocate in bursts of different sizes, "    \
           "for example the small/rare allocations coming after the initial "\
           "large burst.")                                                   \
                                                                             \
-  product(double, ZerTLABElasticity, 1.1, EXPERIMENTAL,                 \
+  product(double, ZeroTLABElasticity, 1.1, EXPERIMENTAL,                 \
           "Multiplier to use when deciding on next TLAB size. Larger value "\
           "improves performance at the expense of per-thread memory waste. "\
           "Lower value improves memory footprint, but penalizes actively "  \
           "allocating threads.")                                            \
           range(1.0, DBL_MAX)                                               \
                                                                             \
-  product(size_t, ZerTLABDecayTime, 1000, EXPERIMENTAL,                 \
+  product(size_t, ZeroTLABDecayTime, 1000, EXPERIMENTAL,                 \
           "TLAB sizing policy decays to initial size after thread had not " \
           "allocated for this long. Time is in milliseconds. Lower value "  \
           "improves memory footprint, but penalizes actively allocating "   \
           "threads.")                                                       \
           range(1, max_intx)                                                \
                                                                             \
-  product(size_t, ZerMinHeapExpand, 128 * M, EXPERIMENTAL,              \
+  product(size_t, ZeroMinHeapExpand, 128 * M, EXPERIMENTAL,              \
           "Min expansion step for heap. Larger value improves performance " \
           "at the potential expense of memory waste.")                      \
           range(1, max_intx)
 
-// end of GC_ZER_FLAGS
+// end of GC_ZERO_FLAGS
 
-#endif // SHARE_GC_ZER_ZER_GLOBALS_HPP
+#endif // SHARE_GC_ZERO_ZERO_GLOBALS_HPP

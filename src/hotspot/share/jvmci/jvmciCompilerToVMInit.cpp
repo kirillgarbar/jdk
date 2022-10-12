@@ -244,7 +244,7 @@ JVMCIObjectArray CompilerToVM::initialize_intrinsics(JVMCI_TRAPS) {
   do_bool_flag(UseSerialGC)                                                \
   do_bool_flag(UseZGC)                                                     \
   do_bool_flag(UseEpsilonGC)                                               \
-  do_bool_flag(UseZerGC)                                                   \
+  do_bool_flag(UseZeroGC)                                                   \
   COMPILER2_PRESENT(do_bool_flag(UseMontgomeryMultiplyIntrinsic))          \
   COMPILER2_PRESENT(do_bool_flag(UseMontgomerySquareIntrinsic))            \
   COMPILER2_PRESENT(do_bool_flag(UseMulAddIntrinsic))                      \
