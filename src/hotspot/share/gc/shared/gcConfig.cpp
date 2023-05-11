@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,9 @@
 #if INCLUDE_EPSILONGC
 #include "gc/epsilon/epsilonArguments.hpp"
 #endif
+#if INCLUDE_MSWEEPGC
+#include "gc/msweep/msweepArguments.hpp"
+#endif
 #if INCLUDE_G1GC
 #include "gc/g1/g1Arguments.hpp"
 #endif
@@ -44,7 +47,7 @@
 #include "gc/shenandoah/shenandoahArguments.hpp"
 #endif
 #if INCLUDE_ZGC
-#include "gc/z/zArguments.hpp"
+#include "gc/z/shared/zSharedArguments.hpp"
 #endif
 
 struct IncludedGC {
@@ -58,16 +61,18 @@ struct IncludedGC {
 };
 
    EPSILONGC_ONLY(static EpsilonArguments    epsilonArguments;)
+      MSWEEPGC_ONLY(static MSweepArguments       msweepArguments;)
         G1GC_ONLY(static G1Arguments         g1Arguments;)
   PARALLELGC_ONLY(static ParallelArguments   parallelArguments;)
     SERIALGC_ONLY(static SerialArguments     serialArguments;)
 SHENANDOAHGC_ONLY(static ShenandoahArguments shenandoahArguments;)
-         ZGC_ONLY(static ZArguments          zArguments;)
+         ZGC_ONLY(static ZSharedArguments    zArguments;)
 
 // Table of included GCs, for translating between command
 // line flag, CollectedHeap::Name and GCArguments instance.
 static const IncludedGC IncludedGCs[] = {
    EPSILONGC_ONLY_ARG(IncludedGC(UseEpsilonGC,       CollectedHeap::Epsilon,    epsilonArguments,    "epsilon gc"))
+      MSWEEPGC_ONLY_ARG(IncludedGC(UseMSweepGC,          CollectedHeap::MSweep,       msweepArguments,       "msweep gc"))
         G1GC_ONLY_ARG(IncludedGC(UseG1GC,            CollectedHeap::G1,         g1Arguments,         "g1 gc"))
   PARALLELGC_ONLY_ARG(IncludedGC(UseParallelGC,      CollectedHeap::Parallel,   parallelArguments,   "parallel gc"))
     SERIALGC_ONLY_ARG(IncludedGC(UseSerialGC,        CollectedHeap::Serial,     serialArguments,     "serial gc"))
@@ -83,11 +88,12 @@ SHENANDOAHGC_ONLY_ARG(IncludedGC(UseShenandoahGC,    CollectedHeap::Shenandoah, 
     vm_exit_during_initialization("Option -XX:+" #option " not supported"); \
   }
 
-GCArguments* GCConfig::_arguments = NULL;
+GCArguments* GCConfig::_arguments = nullptr;
 bool GCConfig::_gc_selected_ergonomically = false;
 
 void GCConfig::fail_if_non_included_gc_is_selected() {
   NOT_EPSILONGC(   FAIL_IF_SELECTED(UseEpsilonGC));
+  NOT_MSWEEPGC(      FAIL_IF_SELECTED(UseMSweepGC));
   NOT_G1GC(        FAIL_IF_SELECTED(UseG1GC));
   NOT_PARALLELGC(  FAIL_IF_SELECTED(UseParallelGC));
   NOT_SERIALGC(    FAIL_IF_SELECTED(UseSerialGC));
@@ -150,7 +156,7 @@ GCArguments* GCConfig::select_gc() {
     if (is_no_gc_selected()) {
       // Failed to select GC ergonomically
       vm_exit_during_initialization("Garbage collector not selected "
-                                    "(default collector explicitly disabled)", NULL);
+                                    "(default collector explicitly disabled)", nullptr);
     }
 
     // Succeeded to select GC ergonomically
@@ -159,7 +165,7 @@ GCArguments* GCConfig::select_gc() {
 
   if (!is_exactly_one_gc_selected()) {
     // More than one GC selected
-    vm_exit_during_initialization("Multiple garbage collectors selected", NULL);
+    vm_exit_during_initialization("Multiple garbage collectors selected", nullptr);
   }
 
   // Exactly one GC selected
@@ -171,11 +177,11 @@ GCArguments* GCConfig::select_gc() {
 
   fatal("Should have found the selected GC");
 
-  return NULL;
+  return nullptr;
 }
 
 void GCConfig::initialize() {
-  assert(_arguments == NULL, "Already initialized");
+  assert(_arguments == nullptr, "Already initialized");
   _arguments = select_gc();
 }
 
@@ -231,6 +237,6 @@ const char* GCConfig::hs_err_name(CollectedHeap::Name name) {
 }
 
 GCArguments* GCConfig::arguments() {
-  assert(_arguments != NULL, "Not initialized");
+  assert(_arguments != nullptr, "Not initialized");
   return _arguments;
 }

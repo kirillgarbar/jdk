@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2023, Kirill Garbar, Red Hat, Inc. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+
+package gc.msweep;
+
+/**
+ * @test TestDieDefault
+ * @summary MSweep GC should die on heap exhaustion
+ * @library /test/lib
+ * @run driver gc.msweep.TestDieDefault
+ */
+
+import jdk.test.lib.process.OutputAnalyzer;
+import jdk.test.lib.process.ProcessTools;
+
+public class TestDieDefault {
+
+  public static void passWith(String... args) throws Exception {
+    ProcessBuilder pb = ProcessTools.createJavaProcessBuilder(args);
+    OutputAnalyzer out = new OutputAnalyzer(pb.start());
+    out.shouldNotContain("OutOfMemoryError");
+    out.shouldHaveExitValue(0);
+  }
+
+  public static void failWith(String... args) throws Exception {
+    ProcessBuilder pb = ProcessTools.createJavaProcessBuilder(args);
+    OutputAnalyzer out = new OutputAnalyzer(pb.start());
+    out.shouldContain("OutOfMemoryError");
+    if (out.getExitValue() == 0) {
+      throw new IllegalStateException("Should have failed with non-zero exit code");
+    }
+  }
+
+  public static void main(String[] args) throws Exception {
+    failWith("-Xmx64m",
+             "-XX:+UnlockExperimentalVMOptions",
+             "-XX:+UseMSweepGC",
+             "-XX:-UseCompressedOops",
+             TestDieDefault.Workload.class.getName());
+  }
+
+  public static class Workload {
+    static int COUNT = Integer.getInteger("count", 1); // ~1 GB allocation
+
+    static volatile Object sink;
+
+    public static void main(String... args) {
+      for (int c = 0; c < COUNT; c++) {
+        sink = new int[270000000];
+      }
+    }
+  }
+
+}
